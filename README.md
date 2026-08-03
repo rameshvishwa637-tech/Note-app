@@ -205,4 +205,36 @@ jobs:
 
 ---
 
+## 🔒 Security, Secrets Management & Best Practices
+
+As you build and publish your apps, maintaining top-tier security standards is vital to protect your data, keys, and users. Below are the key security principles you must follow:
+
+### 1. Protect Your Gemini API Keys (Never Hardcode!)
+Your Google AI Studio Gemini API key is private. If leaked, malicious actors can use your quota, leading to account suspension or unexpected costs.
+* **Never Hardcode Secrets**: Do not commit your API key directly in code files like `App.tsx`, `index.js`, or Gradle configurations.
+* **Use Environment Variables**:
+  * For local/mobile testing, use `.env` files (e.g. `VITE_GEMINI_API_KEY=your_key_here`) and ensure `.env` is listed in your `.gitignore` so it is never committed.
+  * In production client apps, **prompt the user to enter their own API key** in the UI settings, and store it securely in client-side storage (like `localStorage` or React Native Secure Store).
+* **Server-Side Proxy**: For web-deployed apps, never call the Gemini API directly from the frontend. Always route requests through a secure backend or serverless function where the API key is safely stored in backend environment secrets.
+
+### 2. GitHub Actions Security (Mitigating Supply Chain Attacks)
+When setting up automated builds on GitHub, ensure you protect your repository and runners:
+* **Pin Actions to Commit SHAs**: In your workflow files (e.g., `.github/workflows/build-apk.yml`), avoid using mutable tags like `v4`. Instead, pin third-party actions to immutable commit SHAs. For example:
+  ```yaml
+  # ❌ Insecure / Mutable
+  - name: Checkout Repository
+    uses: actions/checkout@v4
+
+  # ✅ Secure / Immutable
+  - name: Checkout Repository
+    uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+  ```
+* **Limit Secret Access**: Ensure secrets are only injected into steps that strictly require them, and never print secrets in step logs or echo them to external services.
+
+### 3. Debug APK Safety & Keystores
+* **Do Not Publish Debug APKs Globally**: The debug APKs built in these steps are unsigned or signed with a generic debug keystore. They should only be used for personal testing and debugging.
+* **Keep Release Keystores Secret**: If you generate a release key to publish to the Google Play Store, **never** commit your `.keystore` or `.jks` files, or passwords to your Git repository. Store keystore passphrases and base64-encoded keystores inside secure **GitHub Repository Secrets** and inject them dynamically during production release workflows.
+
+---
+
 *Now go ahead, sync your Google AI Studio app to GitHub, call Google Jules, and build your very first fully custom APK directly on your phone! Happy Vibe Coding!* 🚀
