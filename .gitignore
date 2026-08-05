@@ -1,0 +1,33 @@
+# 🛡️ Sentinel: .gitignore template to secure local configurations and credentials
+
+# API Keys, secrets, and environment files
+.env
+.env.local
+.env.*.local
+*.env
+*.env.local
+*-secret
+*.key
+*.pem
+
+# Android specific builds, configurations, and signing keys
+*.keystore
+*.jks
+local.properties
+.gradle/
+build/
+app/build/
+android/app/build/
+*.apk
+*.apks
+*.aab
+
+# Node/JavaScript dependencies and build outputs
+node_modules/
+dist/
+.npm
+.eslintcache
+
+# OS-specific files
+.DS_Store
+Thumbs.db
