@@ -100,10 +100,12 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        # Pin checkout action to an immutable full-length commit SHA to prevent supply chain vulnerabilities (v4.2.2)
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        # Pin setup-java action to an immutable full-length commit SHA to prevent supply chain vulnerabilities (v4.2.2)
+        uses: actions/setup-java@3a430032ef6804d97e86cf7af680683501d3bb74
         with:
           distribution: 'zulu'
           java-version: '17'
@@ -116,7 +118,8 @@ jobs:
         run: ./gradlew assembleDebug
 
       - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
+        # Pin upload-artifact action to an immutable full-length commit SHA to prevent supply chain vulnerabilities (v4.4.3)
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea2babf0b1851203a72202610
         with:
           name: debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
@@ -139,10 +142,12 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        # Pin checkout action to an immutable full-length commit SHA to prevent supply chain vulnerabilities (v4.2.2)
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        # Pin setup-node action to an immutable full-length commit SHA to prevent supply chain vulnerabilities (v4.0.4)
+        uses: actions/setup-node@0a44ba78417256f3415591d924022a074747f525
         with:
           node-version: 20
           cache: 'npm'
@@ -162,7 +167,8 @@ jobs:
           npx cap sync android
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        # Pin setup-java action to an immutable full-length commit SHA to prevent supply chain vulnerabilities (v4.2.2)
+        uses: actions/setup-java@3a430032ef6804d97e86cf7af680683501d3bb74
         with:
           distribution: 'zulu'
           java-version: '17'
@@ -175,7 +181,8 @@ jobs:
           ./gradlew assembleDebug
 
       - name: Upload Compiled APK
-        uses: actions/upload-artifact@v4
+        # Pin upload-artifact action to an immutable full-length commit SHA to prevent supply chain vulnerabilities (v4.4.3)
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea2babf0b1851203a72202610
         with:
           name: web-wrapped-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
@@ -202,6 +209,29 @@ jobs:
 * **100% Free**: Google AI Studio, GitHub, GitHub Actions, and Google Jules provide generous free tiers that make this setup completely free of charge.
 * **Jules as Your Co-Pilot**: If the build fails on GitHub Actions due to a missing dependency or configuration issue, you don't need to struggle with code. Simply tell Jules the error message, and it will rewrite the files, verify the build in its sandbox, and push the fix automatically.
 * **Rapid Iteration**: Want to add a new feature? Prompt AI Studio, sync to GitHub, and let the background automated build deliver a fresh APK directly to your phone in minutes.
+
+---
+
+## 🔒 Security, Secrets Management, and Best Practices
+
+When building mobile applications with Google AI Studio and GitHub Actions, keeping your API keys and build configurations secure is of paramount importance.
+
+### 1. Securing the Gemini API Key
+* **Never Plain-Text/Hardcode Keys**: Avoid hardcoding your `GEMINI_API_KEY` or other sensitive tokens inside source files. If you commit private keys to public GitHub repositories, scanning tools will flag them, and they can be exploited by malicious actors.
+* **Use Environment Variables**: Configure your application to read keys dynamically from environment variables, such as:
+  ```typescript
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  ```
+* **Utilize GitHub Secrets**: Store sensitive variables securely inside your GitHub repository settings under **Settings > Secrets and variables > Actions**. You can then pass them safely to your build workflow or staging deployment.
+
+### 2. Preventing Supply Chain Attacks with Pinned Actions SHAs
+* **Avoid Tag-Based Actions**: Referencing third-party Actions by tags (e.g. `@v4`) exposes your CI/CD pipeline to risks. If an action's tag is compromised or updated to point to a malicious commit, your runner could execute untrusted code.
+* **Use Immutable Full-Length Commit SHAs**: Secure your GitHub Action workflows by pinning all actions to their immutable 40-character commit SHAs (as shown in the Option A & B templates). This guarantees that the exact same tested code is executed on every run.
+
+### 3. Safe Management of Debug & Signed APKs
+* **Debug APK Limits**: Debug APKs generated via `assembleDebug` are unsigned (using standard debug certificates) and may have debugging enabled. They are perfect for testing but are not suitable for public distribution or the Google Play Store.
+* **Keystore Protection**: For production-ready releases, always build a signed APK or Android App Bundle (AAB). Keep your keystore files secure, never commit `.keystore` or `.jks` files to your repository, and store keystore credentials securely using GitHub Secrets.
+* **Ignore Local Properties**: Ensure that `local.properties` (which contains your local Android SDK path or specific developer keys) is always included in your `.gitignore` to prevent leaking specific developer environments.
 
 ---
 
