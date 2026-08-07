@@ -100,10 +100,10 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@6a0805fcefea3d4657a47ac4c165951e33482018 # v4.2.2
         with:
           distribution: 'zulu'
           java-version: '17'
@@ -116,7 +116,7 @@ jobs:
         run: ./gradlew assembleDebug
 
       - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
@@ -139,10 +139,10 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
         with:
           node-version: 20
           cache: 'npm'
@@ -162,7 +162,7 @@ jobs:
           npx cap sync android
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@6a0805fcefea3d4657a47ac4c165951e33482018 # v4.2.2
         with:
           distribution: 'zulu'
           java-version: '17'
@@ -175,7 +175,7 @@ jobs:
           ./gradlew assembleDebug
 
       - name: Upload Compiled APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: web-wrapped-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
@@ -202,6 +202,36 @@ jobs:
 * **100% Free**: Google AI Studio, GitHub, GitHub Actions, and Google Jules provide generous free tiers that make this setup completely free of charge.
 * **Jules as Your Co-Pilot**: If the build fails on GitHub Actions due to a missing dependency or configuration issue, you don't need to struggle with code. Simply tell Jules the error message, and it will rewrite the files, verify the build in its sandbox, and push the fix automatically.
 * **Rapid Iteration**: Want to add a new feature? Prompt AI Studio, sync to GitHub, and let the background automated build deliver a fresh APK directly to your phone in minutes.
+
+---
+
+## 🛡️ Security, Secrets Management & Best Practices
+
+When building and compiling applications using AI models and cloud automation, security must always remain a top-tier consideration. Below are critical practices to maintain a robust security posture throughout your mobile-only development workflow.
+
+### 🔑 1. Securing Your Gemini API Keys
+Google AI Studio applications often rely on Gemini API keys to communicate with Google's large language models. **Never hardcode your API keys directly into your repository source code or environment files.**
+* **Use Environment Variables:** Load your API key dynamically from your environment (e.g., using `import.meta.env.VITE_API_KEY` for React/Vite).
+* **Utilize GitHub Secrets:** Store sensitive variables securely within GitHub's encrypted secrets environment. Reference them inside your workflow file using `${{ secrets.GEMINI_API_KEY }}`.
+* **Add a Local `.gitignore`:** Ensure files like `.env`, `local.properties`, or any key files are excluded from git. A secure `.gitignore` should look like this:
+  ```gitignore
+  .env*
+  local.properties
+  *.keystore
+  *.jks
+  build/
+  node_modules/
+  dist/
+  ```
+
+### 🔒 2. Preventing Supply Chain Attacks in CI/CD
+As shown in the Option A and Option B templates, GitHub Actions workflows should always pin external actions (e.g., `actions/checkout`) using their **immutable full-length commit SHAs** rather than mutable version tags like `@v4`.
+* **The Risk of Tag Mutable Names:** A tag can be moved or force-pushed to point to a different, potentially compromised codebase.
+* **Pinning Solution:** Referencing a specific commit hash (e.g., `actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7`) guarantees that the exact audited version of the action is executed.
+
+### 📱 3. Debug APK Safety & Keystore Management
+* **Never Commit Keystores:** If you transition from building a debug APK to a production release APK, never check your Android keystore file (`.jks` or `.keystore`) or its passwords into the repository.
+* **Keep Debug APKs Internal:** Debug APKs generated via public GitHub repositories contain debugging symbols and are unsigned. Only share them with trusted testers, and do not distribute unsigned debug APKs to general audiences.
 
 ---
 
