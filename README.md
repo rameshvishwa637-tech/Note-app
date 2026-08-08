@@ -100,10 +100,10 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@8df1039502a15bceb9433410b1a100fbe190c53b # v4.5.0
         with:
           distribution: 'zulu'
           java-version: '17'
@@ -116,7 +116,7 @@ jobs:
         run: ./gradlew assembleDebug
 
       - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
         with:
           name: debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
@@ -139,10 +139,10 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with:
           node-version: 20
           cache: 'npm'
@@ -162,7 +162,7 @@ jobs:
           npx cap sync android
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@8df1039502a15bceb9433410b1a100fbe190c53b # v4.5.0
         with:
           distribution: 'zulu'
           java-version: '17'
@@ -175,7 +175,7 @@ jobs:
           ./gradlew assembleDebug
 
       - name: Upload Compiled APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
         with:
           name: web-wrapped-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
@@ -202,6 +202,28 @@ jobs:
 * **100% Free**: Google AI Studio, GitHub, GitHub Actions, and Google Jules provide generous free tiers that make this setup completely free of charge.
 * **Jules as Your Co-Pilot**: If the build fails on GitHub Actions due to a missing dependency or configuration issue, you don't need to struggle with code. Simply tell Jules the error message, and it will rewrite the files, verify the build in its sandbox, and push the fix automatically.
 * **Rapid Iteration**: Want to add a new feature? Prompt AI Studio, sync to GitHub, and let the background automated build deliver a fresh APK directly to your phone in minutes.
+
+---
+
+## 🔒 Security, Secrets Management, and Best Practices
+
+When building mobile APKs and automating workflows with GitHub Actions, practicing solid security hygiene is critical to prevent credential exposure and build pipeline compromises.
+
+### 1. Securing Gemini API Keys
+Never hardcode your Google Gemini API key or any other service secret in your codebase (such as `MainActivity.kt` or web configuration files).
+- **For Web Apps:** Use environmental variables (e.g., `import.meta.env.VITE_GEMINI_API_KEY`) and supply them at runtime, or inject them as GitHub Actions Secrets during the build phase.
+- **For Native Android Apps:** Utilize the [Secrets Gradle Plugin](https://github.com/google/secrets-gradle-plugin) to read keys from a `local.properties` file that is kept out of version control, or access them securely via environmental variables during building.
+- **Ignore Secrets Files:** Ensure that files like `local.properties`, `.env`, `.env.local`, or configuration files containing keys are explicitly added to your `.gitignore`.
+
+### 2. Pinning GitHub Actions to Immutable Commit SHAs
+Standard GitHub actions tags (such as `@v4`) are mutable and can be modified or hijacked by malicious actors to execute unauthorized code on your runners (a supply chain attack).
+- Always pin actions to their **immutable full-length commit SHAs** (as shown in the Option A & B templates above).
+- Keep version comments next to the SHAs (e.g., `uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2`) so they remain human-readable and maintainable.
+
+### 3. Handling Debug APKs Safely
+Debug APKs are built with relaxed security constraints to facilitate local testing and debugging.
+- **Credential Storage:** Never embed long-lived production secrets inside a debug APK. Debug APKs can be easily decompiled, exposing any embedded strings or keys.
+- **Distribution:** Do not distribute debug APKs to general users. When launching your application publicly, configure a secure Release build signed with a unique upload key and utilize proper ProGuard/R8 obfuscation.
 
 ---
 
