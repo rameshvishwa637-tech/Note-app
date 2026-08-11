@@ -100,10 +100,10 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7 (pinned to SHA to prevent supply chain attacks)
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@99b86f011fc0cd74de62147ce8473a21198e3b7b # v4.2.1
         with:
           distribution: 'zulu'
           java-version: '17'
@@ -116,7 +116,7 @@ jobs:
         run: ./gradlew assembleDebug
 
       - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344d1a7b68719062a721556d6a9 # v4.3.3
         with:
           name: debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
@@ -139,10 +139,10 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7 (pinned to SHA to prevent supply chain attacks)
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@6012dfb466de54b240a53b7f26d602472d766922 # v4.0.3
         with:
           node-version: 20
           cache: 'npm'
@@ -162,7 +162,7 @@ jobs:
           npx cap sync android
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@99b86f011fc0cd74de62147ce8473a21198e3b7b # v4.2.1
         with:
           distribution: 'zulu'
           java-version: '17'
@@ -175,7 +175,7 @@ jobs:
           ./gradlew assembleDebug
 
       - name: Upload Compiled APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344d1a7b68719062a721556d6a9 # v4.3.3
         with:
           name: web-wrapped-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
@@ -202,6 +202,37 @@ jobs:
 * **100% Free**: Google AI Studio, GitHub, GitHub Actions, and Google Jules provide generous free tiers that make this setup completely free of charge.
 * **Jules as Your Co-Pilot**: If the build fails on GitHub Actions due to a missing dependency or configuration issue, you don't need to struggle with code. Simply tell Jules the error message, and it will rewrite the files, verify the build in its sandbox, and push the fix automatically.
 * **Rapid Iteration**: Want to add a new feature? Prompt AI Studio, sync to GitHub, and let the background automated build deliver a fresh APK directly to your phone in minutes.
+
+---
+
+## 🔒 Security, Secrets Management, and Best Practices
+
+When building and compiling applications, especially those backed by large language models like Gemini, maintaining good security hygiene is critical. Follow these best practices to ensure your secrets, code, and builds remain safe:
+
+### 1. Never Hardcode API Keys (e.g., Gemini API Keys)
+Hardcoding your Gemini API key inside your app's frontend or repository source files makes it visible to anyone with access to the codebase (especially if the repository is public).
+* **The Solution:** Use environment variables.
+  * For Web/React apps, load the key dynamically using `import.meta.env.VITE_GEMINI_API_KEY` (Vite) or `process.env.REACT_APP_GEMINI_API_KEY` (Create React App).
+  * For Native Android apps, store the API key in `local.properties` (which is git-ignored by default) and load it into your `BuildConfig` via your `build.gradle` file.
+
+### 2. Leverage GitHub Secrets for CI/CD
+When building your APK on GitHub Actions, do not commit production configurations or credentials to git.
+* Navigate to your repository's **Settings > Secrets and variables > Actions**.
+* Create a **Repository Secret** (e.g., `GEMINI_API_KEY`, `ANDROID_KEYSTORE_BASE64`).
+* Inject the secret into your workflow at build time:
+  ```yaml
+  env:
+    VITE_GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+  ```
+
+### 3. Pin GitHub Actions to Immutable Commit SHAs
+Using tags like `@v4` for your GitHub Actions steps leaves you vulnerable to supply chain attacks if those tags are maliciously updated or hijacked.
+* **The Solution:** Use the specific 40-character commit SHA of the action release instead of the tag (as shown in the templates above). This guarantees that the runner executes the exact, untampered code.
+
+### 4. Handle Keystores and APK Signing Keys Safely
+To publish an app on Google Play or update a previously installed app, it must be signed with a production keystore (.jks) file.
+* **Never commit your `.keystore` or `.jks` files directly to GitHub.**
+* Store your keystore as a Base64-encoded string inside GitHub Secrets, decode it at build time in your GitHub Actions runner, sign your APK securely, and clean up the decoded file after compilation.
 
 ---
 
