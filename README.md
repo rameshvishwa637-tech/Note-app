@@ -100,10 +100,10 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@6a0805fcdc5074154ca0117368f53b8540d49926 # v4.2.2
         with:
           distribution: 'zulu'
           java-version: '17'
@@ -116,7 +116,7 @@ jobs:
         run: ./gradlew assembleDebug
 
       - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
         with:
           name: debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
@@ -139,10 +139,10 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@1e60f620b9541d16bece96c54020245380758a80 # v4.0.3
         with:
           node-version: 20
           cache: 'npm'
@@ -162,7 +162,7 @@ jobs:
           npx cap sync android
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@6a0805fcdc5074154ca0117368f53b8540d49926 # v4.2.2
         with:
           distribution: 'zulu'
           java-version: '17'
@@ -175,7 +175,7 @@ jobs:
           ./gradlew assembleDebug
 
       - name: Upload Compiled APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
         with:
           name: web-wrapped-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
@@ -202,6 +202,75 @@ jobs:
 * **100% Free**: Google AI Studio, GitHub, GitHub Actions, and Google Jules provide generous free tiers that make this setup completely free of charge.
 * **Jules as Your Co-Pilot**: If the build fails on GitHub Actions due to a missing dependency or configuration issue, you don't need to struggle with code. Simply tell Jules the error message, and it will rewrite the files, verify the build in its sandbox, and push the fix automatically.
 * **Rapid Iteration**: Want to add a new feature? Prompt AI Studio, sync to GitHub, and let the background automated build deliver a fresh APK directly to your phone in minutes.
+
+---
+
+## 🔒 Security, Secrets Management & Best Practices
+
+When building AI Studio applications and automating their builds with GitHub Actions, maintaining a strong security posture is essential. Below are some best practices that we strongly encourage you to follow.
+
+### 🔑 Secure Your Gemini API Key (Do Not Hardcode!)
+Hardcoding your Gemini API keys or other sensitive secrets directly in your code violates critical security policies. If your repository is public, bots will instantly scrape and abuse your keys.
+
+#### 1. For Web Apps (Vite / React)
+* **Never** hardcode the key in your code:
+  ```typescript
+  // ❌ BAD: Avoid exposing secrets in your source code
+  const apiKey = "AIzaSyD_EXAMPLE_KEY";
+  ```
+* **Instead**, read it from environment variables:
+  ```typescript
+  // ✅ GOOD: Load from environment variables
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  ```
+* Define your key in a local `.env.local` file (which should be added to `.gitignore` to prevent committing it):
+  ```env
+  VITE_GEMINI_API_KEY=your_actual_api_key_here
+  ```
+* Configure the secret on GitHub:
+  Go to your GitHub Repository -> **Settings** -> **Secrets and variables** -> **Actions** -> Add a Repository Secret named `VITE_GEMINI_API_KEY`.
+
+#### 2. For Native Android Apps (Kotlin / Compose)
+* **Never** put keys directly in `MainActivity.kt` or config files.
+* **Instead**, use Android's `BuildConfig` or Gradle properties. You can store the API key in your user-level `gradle.properties` file or fetch it from system environment variables during GitHub Actions execution:
+  ```kotlin
+  // ✅ GOOD: Use build configuration
+  val apiKey = BuildConfig.GEMINI_API_KEY
+  ```
+* In your `build.gradle.kts` configuration, inject the value safely:
+  ```kotlin
+  buildTypes {
+      release {
+          buildConfigField("String", "GEMINI_API_KEY", "\"${System.getenv("GEMINI_API_KEY") ?: ""}\"")
+      }
+      debug {
+          buildConfigField("String", "GEMINI_API_KEY", "\"${System.getenv("GEMINI_API_KEY") ?: ""}\"")
+      }
+  }
+  ```
+
+---
+
+### 🛡️ Use Pinned Commit SHAs in GitHub Workflows
+To prevent supply chain attacks (where a third-party GitHub Action is compromised or maliciously updated), always pin third-party actions to an immutable full-length commit SHA rather than a mutable tag like `@v4`.
+
+* **Vulnerable**:
+  ```yaml
+  uses: actions/checkout@v4
+  ```
+* **Secure**:
+  ```yaml
+  uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+  ```
+
+---
+
+### 📱 Handle Debug APKs Safely
+The GitHub Actions templates provided in this guide generate a **debug APK** (`app-debug.apk`).
+
+* **Internal Testing Only**: Debug APKs are signed with a generic debug key. They should only be used for personal testing, and never distributed to public users.
+* **Keep Artifacts Private**: If your repository is public, anybody can access and download your built GitHub Actions artifacts. If your debug APK contains hardcoded sensitive keys or test credentials, they can be extracted via reverse engineering. Always verify that your API keys are loaded dynamically as environment variables.
+* **Signing for Production**: To publish your app to the Google Play Store or distribute it securely, you must sign it with an upload/production key. **Never commit your Keystore file (`*.jks`) or Keystore password to your GitHub repository.** Keep them locally and use GitHub Secrets to supply them during production builds.
 
 ---
 
