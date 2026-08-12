@@ -1,0 +1,46 @@
+# Logs and Runtime Files
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-debug.log*
+
+# Build and Output directories
+dist/
+build/
+bin/
+out/
+.gradle/
+app/build/
+android/app/build/
+
+# Local Environment Variables and Secrets (CRITICAL for preventing API Key leaks)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+*.env.local
+
+# IDE and System Files
+.DS_Store
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Android specific builds, keys, and configurations
+*.keystore
+*.jks
+*.apk
+*.aar
+*.jar
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
