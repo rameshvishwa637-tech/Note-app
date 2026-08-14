@@ -100,10 +100,10 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@6a0805f7573b72a4e50f3bc0af379eac21379122 # v4.2.2
         with:
           distribution: 'zulu'
           java-version: '17'
@@ -116,7 +116,7 @@ jobs:
         run: ./gradlew assembleDebug
 
       - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
         with:
           name: debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
@@ -139,10 +139,10 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@6012dfb030a214022a1a222283080bf1246f3322 # v4.0.3
         with:
           node-version: 20
           cache: 'npm'
@@ -162,7 +162,7 @@ jobs:
           npx cap sync android
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@6a0805f7573b72a4e50f3bc0af379eac21379122 # v4.2.2
         with:
           distribution: 'zulu'
           java-version: '17'
@@ -175,7 +175,7 @@ jobs:
           ./gradlew assembleDebug
 
       - name: Upload Compiled APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
         with:
           name: web-wrapped-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
@@ -202,6 +202,27 @@ jobs:
 * **100% Free**: Google AI Studio, GitHub, GitHub Actions, and Google Jules provide generous free tiers that make this setup completely free of charge.
 * **Jules as Your Co-Pilot**: If the build fails on GitHub Actions due to a missing dependency or configuration issue, you don't need to struggle with code. Simply tell Jules the error message, and it will rewrite the files, verify the build in its sandbox, and push the fix automatically.
 * **Rapid Iteration**: Want to add a new feature? Prompt AI Studio, sync to GitHub, and let the background automated build deliver a fresh APK directly to your phone in minutes.
+
+---
+
+## 🔒 Security, Secrets Management, and Best Practices
+
+To ensure your application and automated build pipeline remain fully secure, always follow these critical practices:
+
+### 1. Secure your Gemini API Keys
+* **Do NOT Hardcode Secrets**: Never embed your Google AI Studio / Gemini API keys directly in your source code. If committed, public search engines or malicious actors can steal your keys, leading to quota exhaustion or unexpected costs.
+* **Use Environment Variables**: Load your API keys dynamically using environment variables or configuration files.
+  * For React/Vite web apps: Use `import.meta.env.VITE_GEMINI_API_KEY` and define it in a local, uncommitted `.env` or `.env.local` file.
+  * For Android native apps: Load the key from `local.properties` or system environment variables, rather than hardcoding it in `MainActivity.kt`.
+* **Add a Robust `.gitignore`**: Make sure your repository has a `.gitignore` file that explicitly excludes secret files (like `.env*`, `local.properties`, `google-services.json`, keystores `*.jks` or `*.keystore`).
+
+### 2. Protect GitHub Actions Workflows (Dependency Pinning)
+* **Pin to Commit SHAs**: In your `.github/workflows/` files, avoid using mutable tags (e.g., `@v4`) for third-party actions. If a tag is hijacked or modified, a malicious update could be injected into your build pipeline.
+* **How to Pin**: Use the full-length 40-character commit SHA of the release instead (e.g., `actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332`), and include an inline comment indicating the version name for readability.
+
+### 3. Handle Debug APKs Safely
+* **Debug vs. Production**: The workflows described above generate **debug** APKs signed with a default, insecure, auto-generated debug key. This is great for quick testing on your physical device, but **never** publish a debug APK to a public forum, app store, or production environment.
+* **Production Signing**: For official releases, always use Android's official signing process with a secure, password-protected production keystore. Keep your keystore file and keystore password encrypted and stored as GitHub Repository Secrets, never in plain sight!
 
 ---
 
