@@ -1,0 +1,29 @@
+# Secrets & Credentials
+.env*
+*.env
+local.properties
+*.keystore
+*.jks
+*.p12
+*.pem
+*.key
+google-services.json
+GoogleService-Info.plist
+
+# Android & Gradle Build Artifacts
+.gradle/
+build/
+app/build/
+*.apk
+*.aab
+
+# Node & Web Build Artifacts
+node_modules/
+dist/
+.output/
+
+# IDE & OS
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
