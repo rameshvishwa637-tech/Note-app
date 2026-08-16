@@ -1,0 +1,38 @@
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+*.env
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+
+# Android / Mobile specific sensitive & local files
+local.properties
+google-services.json
+GoogleService-Info.plist
+*.mobileprovision
+
+# Node dependencies & build output
+node_modules/
+dist/
+build/
+.output/
+
+# Gradle & Android build output
+.gradle/
+**/build/
+**/captures/
+.externalNativeBuild/
+.cxx/
+
+# IDE & OS files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
