@@ -1,0 +1,31 @@
+# Environment files & secrets
+.env
+.env.*
+*.env
+local.properties
+secrets.properties
+*.pem
+*.key
+*.p12
+*.jks
+*.keystore
+
+# Build outputs & artifacts
+*.apk
+*.aab
+build/
+dist/
+bin/
+out/
+node_modules/
+.gradle/
+android/app/build/
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Logs
+*.log
