@@ -1,0 +1,27 @@
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+local.properties
+*.pem
+*.key
+*.p12
+
+# Android & Gradle
+.gradle/
+build/
+app/build/
+*.apk
+*.aar
+*.jks
+*.keystore
+
+# Node & Web Builds
+node_modules/
+dist/
+.output/
+
+# OS & IDE
+.DS_Store
+.idea/
+.vscode/
