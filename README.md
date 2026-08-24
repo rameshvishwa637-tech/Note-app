@@ -89,6 +89,9 @@ For native projects, Jules sets up Java, installs the Android command-line tools
 ```yaml
 name: Build Android Debug APK
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [ main ]
@@ -127,6 +130,9 @@ If you built a web app in AI Studio, it needs to be wrapped so it can run inside
 
 ```yaml
 name: Wrap and Build Web App to APK
+
+permissions:
+  contents: read
 
 on:
   push:
@@ -224,6 +230,11 @@ Standard GitHub actions tags (such as `@v4`) are mutable and can be modified or 
 Debug APKs are built with relaxed security constraints to facilitate local testing and debugging.
 - **Credential Storage:** Never embed long-lived production secrets inside a debug APK. Debug APKs can be easily decompiled, exposing any embedded strings or keys.
 - **Distribution:** Do not distribute debug APKs to general users. When launching your application publicly, configure a secure Release build signed with a unique upload key and utilize proper ProGuard/R8 obfuscation.
+
+### 4. Least-Privilege Workflow Permissions
+By default, GitHub Actions workflows may inherit broad permissions if top-level permissions are omitted.
+- **Explicit Scope:** Explicitly declare minimum required permissions (e.g., `permissions: contents: read`) at the top level of your workflow definitions to enforce the principle of least privilege.
+- **Scope Restriction:** Grant elevated permissions (such as `contents: write` or `packages: write`) strictly to specific jobs or steps that require them.
 
 ---
 
