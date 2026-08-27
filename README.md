@@ -94,6 +94,9 @@ on:
     branches: [ main ]
   workflow_dispatch: # Allows manual trigger from your phone
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -132,6 +135,9 @@ on:
   push:
     branches: [ main ]
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   build-apk:
@@ -215,12 +221,17 @@ Never hardcode your Google Gemini API key or any other service secret in your co
 - **For Native Android Apps:** Utilize the [Secrets Gradle Plugin](https://github.com/google/secrets-gradle-plugin) to read keys from a `local.properties` file that is kept out of version control, or access them securely via environmental variables during building.
 - **Ignore Secrets Files:** Ensure that files like `local.properties`, `.env`, `.env.local`, or configuration files containing keys are explicitly added to your `.gitignore`.
 
-### 2. Pinning GitHub Actions to Immutable Commit SHAs
+### 2. Least-Privilege GitHub Token Permissions
+By default, GitHub Actions workflows may run with write or full access to repository contents and settings unless explicitly restricted.
+- Always declare top-level `permissions:` in your workflow files (e.g., `permissions: contents: read`) to enforce the principle of least privilege.
+- Grant additional scope permissions (like `packages: write` or `issues: write`) only to specific jobs that strictly require them.
+
+### 3. Pinning GitHub Actions to Immutable Commit SHAs
 Standard GitHub actions tags (such as `@v4`) are mutable and can be modified or hijacked by malicious actors to execute unauthorized code on your runners (a supply chain attack).
 - Always pin actions to their **immutable full-length commit SHAs** (as shown in the Option A & B templates above).
 - Keep version comments next to the SHAs (e.g., `uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2`) so they remain human-readable and maintainable.
 
-### 3. Handling Debug APKs Safely
+### 4. Handling Debug APKs Safely
 Debug APKs are built with relaxed security constraints to facilitate local testing and debugging.
 - **Credential Storage:** Never embed long-lived production secrets inside a debug APK. Debug APKs can be easily decompiled, exposing any embedded strings or keys.
 - **Distribution:** Do not distribute debug APKs to general users. When launching your application publicly, configure a secure Release build signed with a unique upload key and utilize proper ProGuard/R8 obfuscation.
