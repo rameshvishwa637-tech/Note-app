@@ -94,6 +94,9 @@ on:
     branches: [ main ]
   workflow_dispatch: # Allows manual trigger from your phone
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -132,6 +135,9 @@ on:
   push:
     branches: [ main ]
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   build-apk:
@@ -215,10 +221,9 @@ Never hardcode your Google Gemini API key or any other service secret in your co
 - **For Native Android Apps:** Utilize the [Secrets Gradle Plugin](https://github.com/google/secrets-gradle-plugin) to read keys from a `local.properties` file that is kept out of version control, or access them securely via environmental variables during building.
 - **Ignore Secrets Files:** Ensure that files like `local.properties`, `.env`, `.env.local`, or configuration files containing keys are explicitly added to your `.gitignore`.
 
-### 2. Pinning GitHub Actions to Immutable Commit SHAs
-Standard GitHub actions tags (such as `@v4`) are mutable and can be modified or hijacked by malicious actors to execute unauthorized code on your runners (a supply chain attack).
-- Always pin actions to their **immutable full-length commit SHAs** (as shown in the Option A & B templates above).
-- Keep version comments next to the SHAs (e.g., `uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2`) so they remain human-readable and maintainable.
+### 2. Enforcing Least-Privilege GITHUB_TOKEN Permissions and Pinning Action SHAs
+- **Least-Privilege Permissions:** Standard GitHub Actions run with default `GITHUB_TOKEN` permissions that may grant broad read/write access. Always specify explicit top-level `permissions:` (e.g., `permissions: contents: read`) to restrict token privileges to only what is strictly necessary.
+- **Pinning Action SHAs:** Standard GitHub actions tags (such as `@v4`) are mutable and can be modified or hijacked by malicious actors to execute unauthorized code on your runners (a supply chain attack). Always pin actions to their **immutable full-length commit SHAs** (as shown in the Option A & B templates above) and keep version comments next to the SHAs (e.g., `uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2`).
 
 ### 3. Handling Debug APKs Safely
 Debug APKs are built with relaxed security constraints to facilitate local testing and debugging.
