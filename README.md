@@ -94,6 +94,9 @@ on:
     branches: [ main ]
   workflow_dispatch: # Allows manual trigger from your phone
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -132,6 +135,9 @@ on:
   push:
     branches: [ main ]
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   build-apk:
@@ -224,6 +230,11 @@ Standard GitHub actions tags (such as `@v4`) are mutable and can be modified or 
 Debug APKs are built with relaxed security constraints to facilitate local testing and debugging.
 - **Credential Storage:** Never embed long-lived production secrets inside a debug APK. Debug APKs can be easily decompiled, exposing any embedded strings or keys.
 - **Distribution:** Do not distribute debug APKs to general users. When launching your application publicly, configure a secure Release build signed with a unique upload key and utilize proper ProGuard/R8 obfuscation.
+
+### 4. Enforcing Least-Privilege Workflow Permissions
+By default, GitHub Actions workflows run with permissive `GITHUB_TOKEN` access unless explicitly restricted.
+- **Top-Level Permissions:** Always declare explicit top-level permissions in your workflow files (e.g., `permissions: contents: read`) to prevent compromised actions or dependencies from modifying repository content or creating unauthorized releases.
+- **Principle of Least Privilege:** Only grant additional scopes (such as `packages: write` or `issues: write`) to specific jobs or steps that strictly require them.
 
 ---
 
