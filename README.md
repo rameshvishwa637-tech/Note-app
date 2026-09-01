@@ -94,6 +94,9 @@ on:
     branches: [ main ]
   workflow_dispatch: # Allows manual trigger from your phone
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -132,6 +135,9 @@ on:
   push:
     branches: [ main ]
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   build-apk:
@@ -220,7 +226,12 @@ Standard GitHub actions tags (such as `@v4`) are mutable and can be modified or 
 - Always pin actions to their **immutable full-length commit SHAs** (as shown in the Option A & B templates above).
 - Keep version comments next to the SHAs (e.g., `uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2`) so they remain human-readable and maintainable.
 
-### 3. Handling Debug APKs Safely
+### 3. Enforcing Least-Privilege GitHub Actions Permissions
+By default, GitHub Actions workflows may inherit broad default permissions, increasing the risk of unauthorized write access or data exfiltration if a workflow is compromised.
+- Always set explicit top-level `permissions` in your workflow definitions (e.g., `permissions: contents: read`).
+- Follow the principle of least privilege, granting write access only to specific job scopes when strictly required.
+
+### 4. Handling Debug APKs Safely
 Debug APKs are built with relaxed security constraints to facilitate local testing and debugging.
 - **Credential Storage:** Never embed long-lived production secrets inside a debug APK. Debug APKs can be easily decompiled, exposing any embedded strings or keys.
 - **Distribution:** Do not distribute debug APKs to general users. When launching your application publicly, configure a secure Release build signed with a unique upload key and utilize proper ProGuard/R8 obfuscation.
