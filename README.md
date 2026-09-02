@@ -97,6 +97,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout Repository
@@ -136,6 +138,8 @@ on:
 jobs:
   build-apk:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout Code
@@ -224,6 +228,11 @@ Standard GitHub actions tags (such as `@v4`) are mutable and can be modified or 
 Debug APKs are built with relaxed security constraints to facilitate local testing and debugging.
 - **Credential Storage:** Never embed long-lived production secrets inside a debug APK. Debug APKs can be easily decompiled, exposing any embedded strings or keys.
 - **Distribution:** Do not distribute debug APKs to general users. When launching your application publicly, configure a secure Release build signed with a unique upload key and utilize proper ProGuard/R8 obfuscation.
+
+### 4. Enforcing Least-Privilege Workflow Permissions
+GitHub Actions jobs default to broad read/write access if permissions are omitted.
+- **Restrict Access Scope:** Explicitly declare `permissions: contents: read` within your workflow jobs to enforce the principle of least privilege.
+- **Mitigate Pipeline Hijacking:** Restricting `GITHUB_TOKEN` capabilities prevents compromised build actions or scripts from modifying repository contents or writing back unauthorized changes.
 
 ---
 
